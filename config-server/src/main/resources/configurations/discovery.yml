@@ -1,0 +1,10 @@
+eureka:
+  instance:
+    hostname: localhost
+  client:
+    register-with-eureka: false # Le microservice ne s'enregistre pas dans Eureka
+    fetch-registry: false # Le microservice ne récupère pas les informations des autres microservices
+    service-url:
+      defaultZone: http://${eureka.instance.hostname}:${server.port}/eureka/
+server:
+  port: 8761
