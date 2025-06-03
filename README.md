@@ -1,4 +1,53 @@
-Modifie la foonction exportToExcel pour que les champs pris en compte soit: nom, prenom, matricule, post, email, critereEligibilite, status, dateExecution, filiale, campaign
+exportToExcel(data: IMepList[]) {
+  // Préparation des données à exporter
+  const exportData = data.map(mep => ({
+    nom: mep.nom,
+    prenom: mep.prenom,
+    matricule: mep.matricule,
+    post: mep.post,
+    email: mep.email,
+    critereEligibilite: mep.critereEligibilite,
+    status: mep.status,
+    dateExecution: mep.dateExecution
+      ? new Date(mep.dateExecution).toLocaleDateString()
+      : '',
+    filiale: mep.filiale?.nom || mep.filiale?.libelle || '',
+    campaign: mep.campaign?.nom || mep.campaign?.libelle || ''
+  }));
+
+  const worksheet = XLSX.utils.json_to_sheet(exportData);
+
+  const headerStyle = {
+    font: { bold: true, sz: 14 }
+  };
+
+  // Appliquer le style à la première ligne
+  const headerKeys = Object.keys(exportData[0]);
+  headerKeys.forEach((_, index) => {
+    const colLetter = String.fromCharCode(65 + index); // A, B, C, ...
+    const cell = `${colLetter}1`;
+    if (worksheet[cell]) {
+      worksheet[cell].s = headerStyle;
+    }
+  });
+
+  const generalStyle = {
+    font: { sz: 16 }
+  };
+
+  Object.keys(worksheet).forEach(cell => {
+    if (!cell.endsWith('1') && worksheet[cell] && worksheet[cell].v) {
+      worksheet[cell].s = generalStyle;
+    }
+  });
+
+  worksheet['!cols'] = headerKeys.map(() => ({ wch: 15 }));
+
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, worksheet, 'Feuille1');
+
+  XLSX.writeFile(workbook, `Meps ${this.formatDate()}.xlsx`);
+}Modifie la foonction exportToExcel pour que les champs pris en compte soit: nom, prenom, matricule, post, email, critereEligibilite, status, dateExecution, filiale, campaign
 
 export interface IBaseInterface {
   id?: number;
